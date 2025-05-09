@@ -1,0 +1,87 @@
+@page "/add-expense"
+@page "/edit-expense/{id:guid}"
+@inject NavigationManager NavigationManager
+@inject ExpenseService expenseService
+
+<h3>@FormTitle</h3>
+
+<EditForm Model="@expenseModel" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label class="form-label">Title</label>
+        <InputText class="form-control" @bind-Value="expenseModel.Title" />
+        <ValidationMessage For="@(() => expenseModel.Title)" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Note</label>
+        <InputTextArea class="form-control" @bind-Value="expenseModel.Description" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Amount</label>
+        <InputNumber class="form-control" @bind-Value="expenseModel.Amount" />
+        <ValidationMessage For="@(() => expenseModel.Amount)" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Date</label>
+        <InputDate class="form-control" @bind-Value="expenseModel.Date" />
+        <ValidationMessage For="@(() => expenseModel.Date)" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Category</label>
+        <InputSelect class="form-control" @bind-Value="expenseModel.Category">
+            @foreach (var cat in Enum.GetValues(typeof(ExpenseCategory)))
+            {
+                <option value="@cat">@cat</option>
+            }
+        </InputSelect>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Payment Method</label>
+        <InputSelect class="form-control" @bind-Value="expenseModel.AccountType">
+            @foreach (var method in Enum.GetValues(typeof(PaymentType)))
+            {
+                <option value="@method">@method</option>
+            }
+        </InputSelect>
+    </div>
+
+    <button type="submit" class="btn btn-primary">@FormTitle</button>
+</EditForm>
+
+@code {
+    [Parameter]
+    public Guid? id { get; set; }
+    private string FormTitle => id == null ? "Add Expense" : "Edit Expense";
+    private Expense expenseModel = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (id != null)
+        {
+            var expense = expenseService.GetExpenseById(id.Value);
+            if (expense != null)
+            {
+                expenseModel = expense;
+            }
+        }
+    }
+    private void HandleValidSubmit()
+    {
+        if (id == null)
+        {
+            expenseService.AddExpense(expenseModel);
+        }
+        else
+        {
+            expenseService.UpdateExpense(expenseModel);
+        }
+        NavigationManager.NavigateTo("/");
+    }
+}

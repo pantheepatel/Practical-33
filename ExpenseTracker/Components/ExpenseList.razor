@@ -1,0 +1,65 @@
+@page "/"
+@page "/manage-expense"
+@inject NavigationManager NavigationManager
+@inject ExpenseService expenseService
+@inject IJSRuntime jsRuntime
+
+<h3 class="display-6 text-center text-success">ExpenseList</h3>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Note</th>
+            <th>Amount</th>
+            <th>Date</th>
+            <th>Category</th>
+            <th>Payment Method</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var expense in expenses)
+        {
+            <tr>
+                <td>@expense.Title</td>
+                <td>@expense.Description</td>
+                <td>@expense.Amount.ToString("C")</td>
+                <td>@expense.Date.ToShortDateString()</td>
+                <td>@expense.Category.ToString()</td>
+                <td>@expense.AccountType.ToString()</td>
+                <td>
+                    <button class="btn btn-primary" @onclick="()=>NavigateToEditExpense(expense.ExpenseId)">Edit</button>
+                    <button class="btn btn-danger" @onclick="()=>NavigateToDeleteExpense(expense.ExpenseId)">Delete</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<h5>Total Amount: @totalAmount</h5>
+@code {
+    private List<Expense> expenses = new();
+    protected override void OnInitialized()
+    {
+        expenses = expenseService.GetExpenses();
+    }
+    private void NavigateToEditExpense(Guid id)
+    {
+        NavigationManager.NavigateTo($"/edit-expense/{id}");
+    }
+    private void NavigateToAddExpense()
+    {
+        NavigationManager.NavigateTo("/edit-expense");
+    }
+    private async Task NavigateToDeleteExpense(Guid id)
+    {
+        bool confirm = await jsRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to delete this expense?");
+        if (confirm)
+        {
+            expenseService.DeleteExpense(id);
+            expenses = expenseService.GetExpenses();
+            // StateHasChanged();
+        }
+    }
+    private decimal totalAmount => expenses.Sum(e => e.Amount);
+}
