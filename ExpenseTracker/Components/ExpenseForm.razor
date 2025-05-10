@@ -3,7 +3,7 @@
 @inject NavigationManager NavigationManager
 @inject ExpenseService expenseService
 
-<h3>@FormTitle</h3>
+<h3 class="text-center text-capitalize my-3 bg-black text-white py-2 fw-bold">@FormTitle</h3>
 
 <EditForm Model="@expenseModel" OnValidSubmit="HandleValidSubmit">
     <DataAnnotationsValidator />
