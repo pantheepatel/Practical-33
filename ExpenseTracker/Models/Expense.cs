@@ -10,7 +10,7 @@ namespace ExpenseTracker.Models
 
         [Required(ErrorMessage = "Date is required.")]
         [DataType(DataType.Date)]
-        public DateTime Date { get; set; }
+        public DateTime Date { get; set; } = DateTime.Now;
 
         [Required(ErrorMessage = "Account type is required.")]
         public PaymentType AccountType { get; set; }
